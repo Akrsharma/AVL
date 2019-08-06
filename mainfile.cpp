@@ -124,6 +124,7 @@ int AVLTree :: height(Node *tmp){
 int AVLTree :: heightAVL(){
 	return height(root);
 }
+
 int main(){
     AVLTree t;
 	int option;
