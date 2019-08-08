@@ -5,12 +5,14 @@ class Node{
     int data;
     Node* lchild;
     Node* rchild;
+	Node *parent;
     int hit;
     public:
     Node(int data){
         this->data = data;
         this->lchild = NULL;
         this->rchild = NULL;
+		this->parent = NULL;
         this->hit = 0;
     }
     int getData(){
@@ -18,6 +20,12 @@ class Node{
 	}
 	void setData(int data){
 		this->data = data;
+	}
+	Node *getParent(){
+		return parent;
+	}
+	void *setParent(Node *parent){
+		this->parent = parent;
 	}
 	Node *getLeftChild(){
 		return lchild;
@@ -52,6 +60,8 @@ class AVLTree{
 	void preOrder(Node *);
 	void inOrder(Node *);
 	Node * searchNode(Node *,int );
+	Node *deleteNode(Node *, int);
+	Node *minValueRightSubTree(Node *);
     public:
     void insertNode(int);
     void searchNode(int);
@@ -163,18 +173,85 @@ int AVLTree :: heightAVL(){
 }
 
 void AVLTree :: deleteNode(int data){
-	Node *node = searchNode(root,data);
-	cout<<node->getData()<<endl;
+	root = deleteNode(root,data);
+	//cout<<node->getData()<<endl;
+	cout<<"Deletion Done SuccessFully"<<endl;
+	
+
 }
-
-Node * AVLTree :: searchNode(Node *tmp,int data){
-	if(tmp == NULL) return NULL;
-	else if(data == tmp->getData()) return tmp;
-	else if(data > tmp->getData()){
-		return searchNode(tmp->getRightChild(),data);
+Node *AVLTree :: deleteNode(Node *tmp,int data){
+	if(tmp == NULL)return NULL;
+	if(data < tmp->getData()) tmp->setLeftChild(deleteNode(tmp->getLeftChild(),data));
+	else if(data > tmp->getData()) tmp->setRightChild(deleteNode(tmp->getRightChild(),data));
+	else{
+		if(!tmp->getLeftChild() && !tmp->getRightChild()){
+			delete(tmp);
+			tmp = NULL;
+			return tmp;
+		}
+		else if(tmp->getLeftChild() && tmp->getRightChild()){
+			Node *node = minValueRightSubTree(tmp->getRightChild());
+			cout<<node->getData()<<endl;
+			int n = tmp->getData();
+			tmp->setData(node->getData());
+			node->setData(n);
+			Node *noderchild = node->getRightChild();
+			//tmp->setRightChild(noderchild);
+			if(tmp == root && !node->getLeftChild()){
+				tmp->setRightChild(noderchild);
+				delete(node);
+				node = NULL;
+			}
+			else{
+				delete(node);
+				node = NULL;
+				return noderchild;
+			}
+		}
+		else{
+			Node *tmplchild = tmp->getLeftChild();
+			Node *tmprchild = tmp->getRightChild();
+			delete(tmp);
+			tmp = NULL;
+			if(tmplchild) return tmplchild;
+			else return tmprchild;
+		}
 	}
-	else return searchNode(tmp->getLeftChild(),data);
 
+	tmp->setHeight(max(height(tmp->getLeftChild()),height(tmp->getRightChild()))+1);
+	//Get the balance factor of this ancestor node to check whether this node became unbalanced or not
+	int balance = balanceFactor(tmp);
+	cout<<tmp->getData()<<" "<<balance<<endl;
+	if(balance <= 1 && balance >= -1) return tmp;
+	//Node *tmp1 = tmp->getLeftChild();
+	if(balance >1 && data < tmp->getLeftChild()->getData()){
+		//LL problem
+		cout<<"LL rotation\n";
+		tmp = RightRotate(tmp);
+	}
+	else if(balance > 1 && data > tmp->getLeftChild()->getData()){
+		//LR problem
+		cout<<"LR problemn\n";
+		tmp->setLeftChild(LeftRotate(tmp->getLeftChild()));
+		tmp = RightRotate(tmp);
+	}
+	else if(balance < -1 && data > tmp->getRightChild()->getData()){
+		//RR problem
+		cout<<"RR Problem\n";
+		tmp = LeftRotate(tmp);
+	}
+	else if(balance < -1 && data < tmp->getRightChild()->getData()){
+		//RL problem
+		cout<<"RL problem\n";
+		tmp->setRightChild(RightRotate(tmp->getRightChild()));
+		tmp = LeftRotate(tmp);
+	}
+	
+	return tmp;
+} 
+Node *AVLTree :: minValueRightSubTree(Node *tmp){
+	while(tmp->getLeftChild()) tmp = tmp->getLeftChild();
+	return tmp;
 }
 int main(){
     AVLTree t;
