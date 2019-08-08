@@ -91,23 +91,28 @@ Node * AVLTree :: insertNode(Node *tmp, int data){
 	tmp->setHeight(max(height(tmp->getLeftChild()),height(tmp->getRightChild()))+1);
 	//Get the balance factor of this ancestor node to check whether this node became unbalanced or not
 	int balance = balanceFactor(tmp);
+	cout<<tmp->getData()<<" "<<balance<<endl;
 	if(balance <= 1 && balance >= -1) return tmp;
 	//Node *tmp1 = tmp->getLeftChild();
 	if(tmp->getLeftChild() && (height(tmp->getLeftChild())>height(tmp->getRightChild()))){
-		//LL rotation
+		//LL problem
+		cout<<"LL rotation\n";
 		tmp = RightRotate(tmp);
 	}
 	else if(tmp->getLeftChild() && (height(tmp->getLeftChild()) < height(tmp->getRightChild()))){
-		//LR rotation
+		//LR problem
+		cout<<"LR problemn\n";
 		tmp->setLeftChild(LeftRotate(tmp->getLeftChild()));
 		tmp = RightRotate(tmp);
 	}
 	else if(tmp->getRightChild() && (height(tmp->getLeftChild()) < height(tmp->getRightChild()))){
-		//RR rotation
+		//RR problem
+		cout<<"RR Problem\n";
 		tmp = LeftRotate(tmp);
 	}
 	else if(tmp->getRightChild() && (height(tmp->getLeftChild()) > height(tmp->getRightChild()))){
-		//RL roation
+		//RL problem
+		cout<<"RL problem\n";
 		tmp->setLeftChild(RightRotate(tmp->getRightChild()));
 		tmp = LeftRotate(tmp);
 	}
@@ -115,7 +120,10 @@ Node * AVLTree :: insertNode(Node *tmp, int data){
 	return tmp;
 }
 int AVLTree :: balanceFactor(Node *tmp){
-	return (height(tmp->getLeftChild()) - height(tmp->getRightChild()));
+	int leftheight = 0, rightheight = 0;
+	if(tmp->getLeftChild()) leftheight = height(tmp->getLeftChild())+1;
+	if(tmp->getRightChild()) rightheight = height(tmp->getRightChild())+1;
+	return leftheight - rightheight;
 }
 int AVLTree :: height(Node *tmp){
 	if(tmp == NULL) return 0;
