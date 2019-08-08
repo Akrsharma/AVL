@@ -49,11 +49,39 @@ class AVLTree{
 	int balanceFactor(Node *);
 	Node *LeftRotate(Node *);
 	Node *RightRotate(Node*);
+	void preOrder(Node *);
+	void inOrder(Node *);
+	Node * searchNode(Node *,int );
     public:
     void insertNode(int);
     void searchNode(int);
     int heightAVL();
+	void preOrder();
+	void inOrder();
+	void deleteNode(int );
 };
+
+void AVLTree :: preOrder(){
+	preOrder(root);
+}
+void AVLTree :: preOrder(Node *tmp){
+	if(tmp){
+		cout<<tmp->getData()<<" ";
+		preOrder(tmp->getLeftChild());
+		preOrder(tmp->getRightChild());
+	}
+}
+void AVLTree :: inOrder(){
+	inOrder(root);
+}
+void AVLTree :: inOrder(Node *tmp){
+	if(tmp){
+		
+		inOrder(tmp->getLeftChild());
+		cout<<tmp->getData()<<" ";
+		inOrder(tmp->getRightChild());
+	}
+}
 void AVLTree :: insertNode(int data){
 	root = insertNode(root,data);
     
@@ -62,13 +90,14 @@ void AVLTree :: insertNode(int data){
 }
 
 Node * AVLTree :: RightRotate(Node *tmp){
-	Node *tmp1 = tmp->getLeftChild()->getRightChild();
-	Node *tmp2 = tmp->getLeftChild();
-	tmp->getLeftChild()->setRightChild(tmp);
-	tmp->setLeftChild(tmp1);
+	Node *tmp1 = tmp->getLeftChild();
+	Node *tmp2 = tmp->getLeftChild()->getRightChild();
+	tmp1->setRightChild(tmp);
+	tmp->setLeftChild(tmp2);
 	tmp->setHeight(max(height(tmp->getLeftChild()),height(tmp->getRightChild()))+1);
-	tmp2->setHeight(max(height(tmp->getLeftChild()),height(tmp->getRightChild()))+1);
-	return tmp2; 
+	tmp1->setHeight(max(height(tmp1->getLeftChild()),height(tmp1->getRightChild()))+1);
+	
+	return tmp1; 
 }
 Node * AVLTree :: LeftRotate(Node *tmp){
 	Node *tmp1 = tmp->getRightChild();
@@ -76,7 +105,7 @@ Node * AVLTree :: LeftRotate(Node *tmp){
 	tmp->setRightChild(tmp2);
 	tmp1->setLeftChild(tmp);
 	tmp->setHeight(max(height(tmp->getLeftChild()),height(tmp->getRightChild()))+1);
-	tmp1->setHeight(max(height(tmp->getLeftChild()),height(tmp->getRightChild()))+1);
+	tmp1->setHeight(max(height(tmp1->getLeftChild()),height(tmp1->getRightChild()))+1);
 	return tmp1;
 }
 
@@ -94,26 +123,26 @@ Node * AVLTree :: insertNode(Node *tmp, int data){
 	cout<<tmp->getData()<<" "<<balance<<endl;
 	if(balance <= 1 && balance >= -1) return tmp;
 	//Node *tmp1 = tmp->getLeftChild();
-	if(tmp->getLeftChild() && (height(tmp->getLeftChild())>height(tmp->getRightChild()))){
+	if(balance >1 && data < tmp->getLeftChild()->getData()){
 		//LL problem
 		cout<<"LL rotation\n";
 		tmp = RightRotate(tmp);
 	}
-	else if(tmp->getLeftChild() && (height(tmp->getLeftChild()) < height(tmp->getRightChild()))){
+	else if(balance > 1 && data > tmp->getLeftChild()->getData()){
 		//LR problem
 		cout<<"LR problemn\n";
 		tmp->setLeftChild(LeftRotate(tmp->getLeftChild()));
 		tmp = RightRotate(tmp);
 	}
-	else if(tmp->getRightChild() && (height(tmp->getLeftChild()) < height(tmp->getRightChild()))){
+	else if(balance < -1 && data > tmp->getRightChild()->getData()){
 		//RR problem
 		cout<<"RR Problem\n";
 		tmp = LeftRotate(tmp);
 	}
-	else if(tmp->getRightChild() && (height(tmp->getLeftChild()) > height(tmp->getRightChild()))){
+	else if(balance < -1 && data < tmp->getRightChild()->getData()){
 		//RL problem
 		cout<<"RL problem\n";
-		tmp->setLeftChild(RightRotate(tmp->getRightChild()));
+		tmp->setRightChild(RightRotate(tmp->getRightChild()));
 		tmp = LeftRotate(tmp);
 	}
 	
@@ -121,18 +150,32 @@ Node * AVLTree :: insertNode(Node *tmp, int data){
 }
 int AVLTree :: balanceFactor(Node *tmp){
 	int leftheight = 0, rightheight = 0;
-	if(tmp->getLeftChild()) leftheight = height(tmp->getLeftChild())+1;
-	if(tmp->getRightChild()) rightheight = height(tmp->getRightChild())+1;
+	leftheight = height(tmp->getLeftChild())+1;
+	rightheight = height(tmp->getRightChild())+1;
 	return leftheight - rightheight;
 }
 int AVLTree :: height(Node *tmp){
-	if(tmp == NULL) return 0;
+	if(tmp == NULL) return -1;
 	else return tmp->getHeight();
 }
 int AVLTree :: heightAVL(){
 	return height(root);
 }
 
+void AVLTree :: deleteNode(int data){
+	Node *node = searchNode(root,data);
+	cout<<node->getData()<<endl;
+}
+
+Node * AVLTree :: searchNode(Node *tmp,int data){
+	if(tmp == NULL) return NULL;
+	else if(data == tmp->getData()) return tmp;
+	else if(data > tmp->getData()){
+		return searchNode(tmp->getRightChild(),data);
+	}
+	else return searchNode(tmp->getLeftChild(),data);
+
+}
 int main(){
     AVLTree t;
 	int option;
@@ -170,7 +213,7 @@ int main(){
 			/* code */
 			cout<<"Enter an element to delete : ";
 			cin>>data;
-			//t.deleteNode(data);
+			t.deleteNode(data);
 			break;
 		case 4 /* constant-expression */:
 			/* code */
@@ -178,11 +221,13 @@ int main(){
 			cout<<"The height of the BST is : "<<height<<"\n";
 			break;
 		case 5 /* constant-expression */:
-			//t.preOrder();
+			t.preOrder();
+			cout<<"\n";
 			break;
 		case 6 /* constant-expression */:
 			/* code */
-			//t.inOrder();
+			t.inOrder();
+			cout<<"\n";
 			break;
 		case 7 /* constant-expression */:
 			/* code */
