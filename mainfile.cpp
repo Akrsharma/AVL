@@ -191,22 +191,10 @@ Node *AVLTree :: deleteNode(Node *tmp,int data){
 		}
 		else if(tmp->getLeftChild() && tmp->getRightChild()){
 			Node *node = minValueRightSubTree(tmp->getRightChild());
-			cout<<node->getData()<<endl;
 			int n = tmp->getData();
 			tmp->setData(node->getData());
 			node->setData(n);
-			Node *noderchild = node->getRightChild();
-			//tmp->setRightChild(noderchild);
-			if(tmp == root && !node->getLeftChild()){
-				tmp->setRightChild(noderchild);
-				delete(node);
-				node = NULL;
-			}
-			else{
-				delete(node);
-				node = NULL;
-				return noderchild;
-			}
+			tmp->setRightChild(deleteNode(tmp->getRightChild(),data));
 		}
 		else{
 			Node *tmplchild = tmp->getLeftChild();
@@ -224,23 +212,23 @@ Node *AVLTree :: deleteNode(Node *tmp,int data){
 	cout<<tmp->getData()<<" "<<balance<<endl;
 	if(balance <= 1 && balance >= -1) return tmp;
 	//Node *tmp1 = tmp->getLeftChild();
-	if(balance >1 && data < tmp->getLeftChild()->getData()){
+	if(balance >1 && (height(tmp->getLeftChild())>=height(tmp->getRightChild()))){
 		//LL problem
 		cout<<"LL rotation\n";
 		tmp = RightRotate(tmp);
 	}
-	else if(balance > 1 && data > tmp->getLeftChild()->getData()){
+	else if(balance > 1 && (height(tmp->getLeftChild())<height(tmp->getRightChild()))){
 		//LR problem
 		cout<<"LR problemn\n";
 		tmp->setLeftChild(LeftRotate(tmp->getLeftChild()));
 		tmp = RightRotate(tmp);
 	}
-	else if(balance < -1 && data > tmp->getRightChild()->getData()){
+	else if(balance < -1 && (height(tmp->getLeftChild()) <= height(tmp->getRightChild()))){
 		//RR problem
 		cout<<"RR Problem\n";
 		tmp = LeftRotate(tmp);
 	}
-	else if(balance < -1 && data < tmp->getRightChild()->getData()){
+	else if(balance < -1 && (height(tmp->getLeftChild()) > height(tmp->getRightChild()))){
 		//RL problem
 		cout<<"RL problem\n";
 		tmp->setRightChild(RightRotate(tmp->getRightChild()));
